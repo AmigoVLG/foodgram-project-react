@@ -1,5 +1,5 @@
 from djoser.views import UserViewSet
-from .serializers import CustomUserSerializer, UserSerializer, RecipesSerializer, TagSerializer, IngredientSerializer
+from .serializers import CustomUserSerializer, UserSerializer, RecipesSerializer, TagSerializer, IngredientSerializer, FollowSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import mixins, status, viewsets
 from .permissions import PermissionDenied
@@ -10,9 +10,11 @@ from rest_framework.pagination import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from rest_framework.decorators import action
+
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
-from .models import User, Tag, Recipes, Ingredient
+from .models import User, Tag, Recipes, Ingredient, Follow
 
 
 from rest_framework import mixins
@@ -33,10 +35,33 @@ class UsersView(generics.ListCreateAPIView):
 class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-
 class UserIDView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
+
+
+class FollowView(generics.ListCreateAPIView):
+    serializer_class = FollowSerializer
+
+    def get_queryset(self):
+        user = get_object_or_404(User, id=self.request.user.id)
+        queryset = user.follower.all()
+        return queryset
+
+class SubscribeViewSet(viewsets.ModelViewSet):
+    serializer_class = FollowSerializer
+    queryset = User.objects.all()
+    # def get_queryset(self):
+    #     user = get_object_or_404(User, id=self.request.user.id)
+    #     subscribe = self.kwargs.get('id')
+    #     queryset = user.follower.filter(following=subscribe)
+    #     return queryset
+
+    def perform_create(self, serializer):
+        subscribe = self.kwargs.get('id')
+        following = get_object_or_404(User, id=subscribe)
+        serializer.save(user=self.request.user, following=following)
+
 
 
 class TagsViewSet(ListRetrieveViewSet):
