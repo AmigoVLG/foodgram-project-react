@@ -1,5 +1,9 @@
 from djoser.views import UserViewSet
-from .serializers import CustomUserSerializer, UserSerializer, RecipesSerializer, TagSerializer, IngredientSerializer, FollowSerializer
+from .serializers import (
+    CustomUserSerializer, UserSerializer, RecipesSerializer,
+    TagSerializer, IngredientSerializer, FollowSerializer,
+    FavoriteSerializer, ShoppingSerializer
+    )
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import mixins, status, viewsets
 from .permissions import PermissionDenied
@@ -14,7 +18,7 @@ from rest_framework.decorators import action
 
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
-from .models import User, Tag, Recipes, Ingredient, Follow
+from .models import User, Tag, Recipes, Ingredient, Follow, Favorit, Shopping
 
 
 from rest_framework import mixins
@@ -85,3 +89,34 @@ class RecipesViewSet(viewsets.ModelViewSet):
 class IngridientsViewSet(ListRetrieveViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    serializer_class = FavoriteSerializer
+    def perform_create(self, serializer):
+        recipes = self.kwargs.get('id')
+        favorit = get_object_or_404(Recipes, id=recipes)
+        serializer.save(user=self.request.user, recipes=favorit)
+
+
+    def delete(self, request, id=None):
+
+        favorit = get_object_or_404(Recipes, id=id)
+        instance = get_object_or_404(Favorit, recipes=favorit)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ShoppingViewSet(viewsets.ModelViewSet):
+    serializer_class = ShoppingSerializer
+    def perform_create(self, serializer):
+        recipes = self.kwargs.get('id')
+        shopping = get_object_or_404(Recipes, id=recipes)
+        serializer.save(user=self.request.user, recipes=shopping)
+
+
+    def delete(self, request, id=None):
+
+        shopping = get_object_or_404(Recipes, id=id)
+        instance = get_object_or_404(Shopping, recipes=shopping)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

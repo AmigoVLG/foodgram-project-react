@@ -74,3 +74,11 @@ class Follow(models.Model):
 
     def __str__(self):
         return self.user, self.following
+
+class Favorit (models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipes = models.ForeignKey(Recipes, on_delete=models.CASCADE, related_name = 'favorites')
+
+class Shopping (models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipes = models.ForeignKey(Recipes, on_delete=models.CASCADE, related_name = 'shopping')

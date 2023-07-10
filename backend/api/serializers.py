@@ -6,7 +6,7 @@ from djoser.serializers import UserSerializer
 
 from rest_framework.validators import UniqueTogetherValidator
 
-from .models import User, Ingredient, Tag, Recipes, TagRecipes, IngredientRecipes, Follow
+from .models import User, Ingredient, Tag, Recipes, TagRecipes, IngredientRecipes, Follow, Favorit, Shopping
 
 import base64
 
@@ -154,7 +154,7 @@ class FollowSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get("request")
         follow_id = self.context.get("view").kwargs.get("id")
-        following = get_object_or_404(User, id=follow_id)
+        # following = get_object_or_404(User, id=follow_id)
         if (
             request.method == "POST"
             and Follow.objects.filter(
@@ -165,6 +165,60 @@ class FollowSerializer(serializers.ModelSerializer):
                 "уже подписан"
             )
         if (request.method == "POST"
-            and request.user == following):
+            and request.user.id == int(follow_id)):
             raise serializers.ValidationError("нельзя подписаться на самого себя")
+        return data
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(write_only=True, default=None)
+    recipes = RecipesSerializers_2(default=None)
+    class Meta:
+        model = Favorit
+        fields = ("user", "recipes")
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorit.objects.all(), fields=("user", "recipes")
+            )
+        ]
+    def validate(self, data):
+        request = self.context.get("request")
+        recipes_id = self.context.get("view").kwargs.get("id")
+        user_recipes = get_object_or_404(User, author=recipes_id)
+        if (
+            request.method == "POST"
+            and Favorit.objects.filter(
+                user=request.user.id, recipes=int(recipes_id)
+            ).exists()
+        ):
+            raise serializers.ValidationError(
+                "уже добавлен"
+            )
+        if (request.method == "POST"
+            and request.user == user_recipes):
+            raise serializers.ValidationError("зачем добавлять свой рецепт")
+        return data
+
+class ShoppingSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(write_only=True, default=None)
+    recipes = RecipesSerializers_2(default=None)
+    class Meta:
+        model = Shopping
+        fields = ("user", "recipes")
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorit.objects.all(), fields=("user", "recipes")
+            )
+        ]
+    def validate(self, data):
+        request = self.context.get("request")
+        recipes_id = self.context.get("view").kwargs.get("id")
+        if (
+            request.method == "POST"
+            and Shopping.objects.filter(
+                user=request.user.id, recipes=int(recipes_id)
+            ).exists()
+        ):
+            raise serializers.ValidationError(
+                "уже добавлен"
+            )
         return data
