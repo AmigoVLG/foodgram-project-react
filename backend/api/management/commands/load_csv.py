@@ -1,8 +1,8 @@
-from csv import DictReader
+from csv import reader
 
 from django.core.management import BaseCommand
 
-from .models import Ingredient
+from api.models import Ingredient
 
 
 class Command(BaseCommand):
@@ -15,10 +15,6 @@ class Command(BaseCommand):
     help = "Импорт .csv в Django Database"
 
     def handle(self, *args, **kwargs):
-        for row in DictReader(open("data/ingredients.csv", encoding="utf-8")):
-            ingredient = Ingredient(
-                name=row["name"],
-                measurement_unit=row["measurement_unit"]
-
-            )
+        for row in reader(open("data/ingredients.csv", encoding="utf-8")):
+            ingredient = Ingredient(name=row[0], unit=row[1])
             ingredient.save()

@@ -1,5 +1,4 @@
-
-from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class PermissionDenied(BasePermission):
@@ -8,6 +7,6 @@ class PermissionDenied(BasePermission):
         author = obj.author
         if request.method in SAFE_METHODS:
             return True
+        if user.is_staff:
+            return True
         return author == user
-
-
