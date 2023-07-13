@@ -22,6 +22,7 @@ from .models import (
 
 class Base64ImageField(serializers.ImageField):
     """Сериализатор изображений"""
+
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith("data:image"):
             format, imgstr = data.split(";base64,")
@@ -34,6 +35,7 @@ class Base64ImageField(serializers.ImageField):
 
 class IngredientRecipesSerializer(serializers.ModelSerializer):
     """Сериализатор для связи ингридиентов рецептов и количества"""
+
     name = serializers.SlugRelatedField(read_only=True, slug_field="name")
     id = serializers.SerializerMethodField(source="kora")
 
@@ -47,6 +49,7 @@ class IngredientRecipesSerializer(serializers.ModelSerializer):
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор модели ингридиентов"""
+
     measurement_unit = serializers.CharField(source="unit")
 
     class Meta:
@@ -56,6 +59,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор модели тегов"""
+
     class Meta:
         model = Tag
         fields = ("id", "name", "color", "slug")
@@ -63,6 +67,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class RecipesSerializer(serializers.ModelSerializer):
     """Главный сериализатор рецептов"""
+
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = IngredientRecipesSerializer(
@@ -143,6 +148,7 @@ class RecipesSerializer(serializers.ModelSerializer):
 
 class MiniRecipesSerializers(serializers.ModelSerializer):
     """Сериализатор рецептов для предпросмотра"""
+
     class Meta:
         model = Recipes
         fields = ("id", "name", "image", "time")
@@ -150,6 +156,7 @@ class MiniRecipesSerializers(serializers.ModelSerializer):
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор подписок"""
+
     user = serializers.CharField(write_only=True, default=None)
     recipes = MiniRecipesSerializers(default=None)
 
@@ -180,6 +187,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 class ShoppingSerializer(serializers.ModelSerializer):
     """Сериализатор списка покупок"""
+
     user = serializers.CharField(write_only=True, default=None)
     recipes = MiniRecipesSerializers(default=None)
 
@@ -193,11 +201,8 @@ class ShoppingSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        print (self)
-        print (data)
         request = self.context.get("request")
         recipes_id = self.context.get("view").kwargs.get("id")
-        print (recipes_id,'!!!!!!', type(recipes_id))
         if (
             request.method == "POST"
             and Shopping.objects.filter(

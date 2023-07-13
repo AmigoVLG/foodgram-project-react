@@ -1,4 +1,4 @@
-from rest_framework.routers import DefaultRouter, views
+from rest_framework.routers import DefaultRouter
 
 from django.urls import include, path, re_path
 
@@ -26,6 +26,5 @@ router.register(
 
 urlpatterns = [
     re_path(r"^auth/", include("djoser.urls.authtoken")),
-    # path('recipes/<int:pk>/shopping_cart/', ShoppingViewSet.as_view()),
     path("", include(router.urls)),
 ]

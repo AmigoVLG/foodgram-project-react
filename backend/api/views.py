@@ -37,6 +37,7 @@ class ListRetrieveViewSet(
 
 class RecipesViewSet(viewsets.ModelViewSet):
     """CRUD рецептов и выгрузка списка покупок"""
+
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     permission_classes = (
@@ -113,7 +114,8 @@ class FavoriteViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Просмотр, добавление и удаление избранных рецептов """
+    """Добавление и удаление избранных рецептов"""
+
     serializer_class = FavoriteSerializer
 
     def perform_create(self, serializer):
@@ -133,7 +135,8 @@ class ShoppingViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Просмотр, добавление и удаление в списке покупок"""
+    """Добавление и удаление в списке покупок"""
+
     serializer_class = ShoppingSerializer
 
     def perform_create(self, serializer, pk=None):
