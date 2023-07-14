@@ -1,8 +1,7 @@
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
+    IsAuthenticated, IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
 
@@ -12,20 +11,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from .filters import RecipesFilter
 from .models import (
-    Favorit,
-    Ingredient,
-    IngredientRecipes,
-    Recipes,
-    Shopping,
-    Tag,
+    Favorit, Ingredient, IngredientRecipes, Recipes, Shopping, Tag,
 )
 from .permissions import PermissionDenied
 from .serializers import (
-    FavoriteSerializer,
-    IngredientSerializer,
-    RecipesSerializer,
-    ShoppingSerializer,
-    TagSerializer,
+    FavoriteSerializer, IngredientSerializer, RecipesSerializer,
+    ShoppingSerializer, TagSerializer,
 )
 
 

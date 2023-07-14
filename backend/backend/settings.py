@@ -3,22 +3,15 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = (
     "django-insecure-4#$4oxlcci0#owbz59t@z(6ir31$sjt)s6(&-h)t4siyg#v$j1"
 )
 
-# SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -72,18 +65,6 @@ DATABASES = {
     }
 }
 
-# DATABASES = {d
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME':'django',
-#         'USER':'django_user',
-#         'PASSWORD':'mysecretpassword',
-#         'HOST': 'localhost',
-#         'PORT': ''
-
-#     }
-# }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -108,7 +89,6 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PAGINATION_CLASS": "api.pagination.CustomPagination",
-    # "PAGE_SIZE": 5,
 }
 
 DJOSER = {
@@ -138,8 +118,5 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 STATIC_URL = "/static/"
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

@@ -2,20 +2,14 @@ import base64
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from users.serializers import CustomUserSerializer
 
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 
+from users.serializers import CustomUserSerializer
 from .models import (
-    Favorit,
-    Ingredient,
-    IngredientRecipes,
-    Recipes,
-    Shopping,
-    Tag,
-    TagRecipes,
+    Favorit, Ingredient, IngredientRecipes, Recipes, Shopping, Tag, TagRecipes,
     User,
 )
 
