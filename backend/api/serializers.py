@@ -9,7 +9,13 @@ from django.shortcuts import get_object_or_404
 
 from users.serializers import CustomUserSerializer
 from .models import (
-    Favorit, Ingredient, IngredientRecipes, Recipes, Shopping, Tag, TagRecipes,
+    Favorit,
+    Ingredient,
+    IngredientRecipes,
+    Recipes,
+    Shopping,
+    Tag,
+    TagRecipes,
     User,
 )
 
@@ -30,12 +36,12 @@ class Base64ImageField(serializers.ImageField):
 class IngredientRecipesSerializer(serializers.ModelSerializer):
     """Сериализатор для связи ингридиентов рецептов и количества"""
 
-    name = serializers.SlugRelatedField(read_only=True, slug_field="name")
-    id = serializers.SerializerMethodField(source="kora")
+    ingredient = serializers.StringRelatedField(read_only=True)
+    id = serializers.SerializerMethodField(source="ingedien_id")
 
     class Meta:
         model = IngredientRecipes
-        fields = ("id", "name", "amount", "unit")
+        fields = ("id", "ingredient", "amount", "unit")
 
     def get_id(self, obj):
         return obj.ingredient.id
@@ -98,7 +104,25 @@ class RecipesSerializer(serializers.ModelSerializer):
             return False
         return obj.favorites.filter(user=user).exists()
 
+    def validate(self, data):
+        """Проверка наличия тегов, ингредиентов и времени приготовления"""
+        try:
+            self.initial_data["tags"][0]
+        except (KeyError, IndexError):
+            raise serializers.ValidationError("минимум один тег обязателен")
+        if data.get("time") <= 0:
+            raise serializers.ValidationError(
+                "время приготовления не может быть нулевым и отрицательным"
+            )
+        try:
+            self.initial_data["ingredients"][0]
+        except (KeyError, IndexError):
+            raise serializers.ValidationError("ингредиенты обязательны")
+
+        return data
+
     def create(self, validated_data):
+        """создание рецепта и проверка ингредиентов в одном рецепте"""
         tags = self.initial_data["tags"]
         ingridients = self.initial_data["ingredients"]
         recipes = Recipes.objects.create(**validated_data)
@@ -109,6 +133,12 @@ class RecipesSerializer(serializers.ModelSerializer):
             current_ingredient = get_object_or_404(
                 Ingredient, id=ingridient["id"]
             )
+            if IngredientRecipes.objects.filter(
+                ingredient=current_ingredient, name=recipes
+            ).exists():
+                raise serializers.ValidationError(
+                    "ингредиент уже добавлен, увеличте количество"
+                )
             IngredientRecipes.objects.create(
                 ingredient=current_ingredient,
                 name=recipes,
