@@ -9,7 +9,6 @@ from rest_framework.response import Response
 
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Count, Sum
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from recipes.models import (
@@ -135,24 +134,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
             .values("ingredient__name", "unit")
             .annotate(amount=Sum("amount"))
         )
-
-        # cart = {}
-        # for goods in shopping_cart:
-        #     x = goods.recipes.id
-        #     recipes = IngredientRecipe.objects.filter(name_id=x)
-        #     for recipe in recipes:
-        #         if recipe.ingredient.name in cart:
-        #             cart[recipe.ingredient.name][0] += recipe.amount
-        #         else:
-        #             cart[recipe.ingredient.name] = [recipe.amount, recipe.unit]
-
-        # response = HttpResponse(
-        #     shopping_cart,
-        #     {
-        #         "Content-Type": "text/plain",
-        #         "Content-Disposition": 'attachment; filename="out_list.txt"',
-        #     },
-        # )
         return create_shopping_cart(shopping_cart)
 
 
