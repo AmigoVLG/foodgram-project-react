@@ -1,17 +1,17 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = (
-    "django-insecure-4#$4oxlcci0#owbz59t@z(6ir31$sjt)s6(&-h)t4siyg#v$j1"
-)
+load_dotenv()
 
+SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split()
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "djoser",
     "api",
     "users",
+    "recipes",
 ]
 
 MIDDLEWARE = [
@@ -89,12 +90,13 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PAGINATION_CLASS": "api.pagination.CustomPagination",
+    "PAGE_SIZE": 6,
 }
 
 DJOSER = {
     "SERIALIZERS": {
-        "current_user": "users.serializers.CustomUserSerializer",
-        "create_user": "users.serializers.CustomUserSerializer",
+        "current_user": "api.serializers.CustomUserSerializer",
+        "user_create": "api.serializers.CustomUserSerializer",
     },
     "LOGIN_FIELD": "email",
     "HIDE_USERS": False,

@@ -1,4 +1,5 @@
-from rest_framework import filters, mixins, status, viewsets
+from djoser.views import UserViewSet
+from rest_framework import filters, generics, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -6,27 +7,77 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 
-from .filters import RecipesFilter
-from .models import (
-    Favorit,
+from recipes.models import (
+    FavoritRecipe,
     Ingredient,
-    IngredientRecipes,
-    Recipes,
-    Shopping,
+    IngredientRecipe,
+    Recipe,
+    ShoppingCart,
     Tag,
 )
+from users.models import Follow, User
+from .utils import create_shopping_cart
+from .filters import RecipesFilter
+from .pagination import CustomPagination
 from .permissions import PermissionDenied
 from .serializers import (
+    CustomUserSerializer,
     FavoriteSerializer,
+    FollowSerializer,
     IngredientSerializer,
     RecipesSerializer,
     ShoppingSerializer,
     TagSerializer,
+    UserFollowSerializer,
 )
+
+
+class CustomUserViewSet(UserViewSet):
+    queryset = User.objects.all()
+    serializer_class = CustomUserSerializer
+    pagination_class = CustomPagination
+
+
+class FollowView(generics.ListAPIView):
+    """Просмотр подписок"""
+
+    serializer_class = UserFollowSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = User.objects.filter(following__user=user).annotate(
+            recipes_count=Count("author")
+        )
+        return queryset
+
+
+class SubscribeViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Добавление и удаление подписок"""
+
+    serializer_class = FollowSerializer
+    queryset = User.objects.all().annotate(recipes_count=Count("author"))
+
+    def perform_create(self, serializer, id=None):
+        subscribe = self.kwargs.get("id")
+        following = get_object_or_404(User, id=subscribe)
+        serializer.save(user=self.request.user, following=following)
+
+    def delete(self, request, id=None):
+        follower = get_object_or_404(User, id=id)
+        instance = get_object_or_404(
+            Follow, user=self.request.user, following=follower
+        )
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ListRetrieveViewSet(
@@ -38,7 +89,11 @@ class ListRetrieveViewSet(
 class RecipesViewSet(viewsets.ModelViewSet):
     """CRUD рецептов и выгрузка списка покупок"""
 
-    queryset = Recipes.objects.all()
+    queryset = (
+        Recipe.objects.all()
+        .select_related("author")
+        .prefetch_related("tags", "ingredients")
+    )
     serializer_class = RecipesSerializer
     permission_classes = (
         PermissionDenied,
@@ -61,7 +116,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
     filterset_class = RecipesFilter
 
     def perform_create(self, serializer):
-        print("perform_create")
         serializer.save(author=self.request.user)
 
     @action(
@@ -73,25 +127,33 @@ class RecipesViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         user = request.user
-        shopping_cart = Shopping.objects.filter(user=user)
-        cart = {}
-        for goods in shopping_cart:
-            x = goods.recipes.id
-            recipes = IngredientRecipes.objects.filter(name_id=x)
-            for recipe in recipes:
-                if recipe.ingredient.name in cart:
-                    cart[recipe.ingredient.name][0] += recipe.amount
-                else:
-                    cart[recipe.ingredient.name] = [recipe.amount, recipe.unit]
-
-        response = HttpResponse(
-            cart.items(),
-            {
-                "Content-Type": "text/plain",
-                "Content-Disposition": 'attachment; filename="out_list.txt"',
-            },
+        shopping_query = IngredientRecipe.objects.filter(
+            name__shopping__user=user
         )
-        return response
+        shopping_cart = (
+            shopping_query.values_list()
+            .values("ingredient__name", "unit")
+            .annotate(amount=Sum("amount"))
+        )
+
+        # cart = {}
+        # for goods in shopping_cart:
+        #     x = goods.recipes.id
+        #     recipes = IngredientRecipe.objects.filter(name_id=x)
+        #     for recipe in recipes:
+        #         if recipe.ingredient.name in cart:
+        #             cart[recipe.ingredient.name][0] += recipe.amount
+        #         else:
+        #             cart[recipe.ingredient.name] = [recipe.amount, recipe.unit]
+
+        # response = HttpResponse(
+        #     shopping_cart,
+        #     {
+        #         "Content-Type": "text/plain",
+        #         "Content-Disposition": 'attachment; filename="out_list.txt"',
+        #     },
+        # )
+        return create_shopping_cart(shopping_cart)
 
 
 class TagsViewSet(ListRetrieveViewSet):
@@ -121,12 +183,12 @@ class FavoriteViewSet(
 
     def perform_create(self, serializer):
         recipes = self.kwargs.get("id")
-        favorit = get_object_or_404(Recipes, id=recipes)
+        favorit = get_object_or_404(Recipe, id=recipes)
         serializer.save(user=self.request.user, recipes=favorit)
 
     def delete(self, request, id=None):
-        favorit = get_object_or_404(Recipes, id=id)
-        instance = get_object_or_404(Favorit, recipes=favorit)
+        favorit = get_object_or_404(Recipe, id=id)
+        instance = get_object_or_404(FavoritRecipe, recipes=favorit)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -142,11 +204,11 @@ class ShoppingViewSet(
 
     def perform_create(self, serializer, pk=None):
         recipes = self.kwargs.get("id")
-        shopping = get_object_or_404(Recipes, id=recipes)
+        shopping = get_object_or_404(Recipe, id=recipes)
         serializer.save(user=self.request.user, recipes=shopping)
 
     def delete(self, request, id=None):
-        shopping = get_object_or_404(Recipes, id=id)
-        instance = get_object_or_404(Shopping, recipes=shopping)
+        shopping = get_object_or_404(Recipe, id=id)
+        instance = get_object_or_404(ShoppingCart, recipes=shopping)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
