@@ -1,9 +1,13 @@
+from django.db.models.query import QuerySet
 from django.http import HttpResponse
 
+from recipes.models import ShoppingCart
 
-def create_shopping_cart(ingredients_cart):
-    """Формируем список покупок из запроса в файл"""
-    print(ingredients_cart.values_list)
+
+def create_shopping_cart(
+    ingredients_cart: QuerySet[ShoppingCart],
+) -> HttpResponse:
+    """Формируем список покупок из запроса в файл."""
 
     shopping_cart = "\n".join(
         [

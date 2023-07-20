@@ -2,38 +2,27 @@ from djoser.views import UserViewSet
 from rest_framework import filters, generics, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
+    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
 
-from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Count, Sum
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
 from recipes.models import (
-    FavoritRecipe,
-    Ingredient,
-    IngredientRecipe,
-    Recipe,
-    ShoppingCart,
-    Tag,
+    FavoritRecipe, Ingredient, IngredientRecipe, Recipe, ShoppingCart, Tag,
 )
 from users.models import Follow, User
-from .utils import create_shopping_cart
-from .filters import RecipesFilter
+from .filters import RecipesFilter, IngredientsFilter
 from .pagination import CustomPagination
 from .permissions import PermissionDenied
 from .serializers import (
-    CustomUserSerializer,
-    FavoriteSerializer,
-    FollowSerializer,
-    IngredientSerializer,
-    RecipesSerializer,
-    ShoppingSerializer,
-    TagSerializer,
+    CustomUserSerializer, FavoriteSerializer, FollowSerializer,
+    IngredientSerializer, RecipesSerializer, ShoppingSerializer, TagSerializer,
     UserFollowSerializer,
 )
+from .utils import create_shopping_cart
 
 
 class CustomUserViewSet(UserViewSet):
@@ -43,7 +32,7 @@ class CustomUserViewSet(UserViewSet):
 
 
 class FollowView(generics.ListAPIView):
-    """Просмотр подписок"""
+    """Просмотр подписок."""
 
     serializer_class = UserFollowSerializer
 
@@ -60,7 +49,7 @@ class SubscribeViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Добавление и удаление подписок"""
+    """Добавление и удаление подписок."""
 
     serializer_class = FollowSerializer
     queryset = User.objects.all().annotate(recipes_count=Count("author"))
@@ -86,12 +75,10 @@ class ListRetrieveViewSet(
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
-    """CRUD рецептов и выгрузка списка покупок"""
+    """CRUD рецептов и выгрузка списка покупок."""
 
-    queryset = (
-        Recipe.objects.all()
-        .select_related("author")
-        .prefetch_related("tags", "ingredients")
+    queryset = Recipe.objects.select_related("author").prefetch_related(
+        "tags", "ingredients"
     )
     serializer_class = RecipesSerializer
     permission_classes = (
@@ -138,19 +125,26 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
 
 class TagsViewSet(ListRetrieveViewSet):
-    """Получение одного или списка тегов"""
+    """Получение одного или списка тегов."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    permission_classes = [
+        AllowAny,
+    ]
 
 
 class IngridientsViewSet(ListRetrieveViewSet):
-    """Получение одного или списка ингридиентов"""
+    """Получение одного или списка ингридиентов."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ("name",)
+    permission_classes = [
+        AllowAny,
+    ]
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = IngredientsFilter
+    search_fields = ('^name', )
 
 
 class FavoriteViewSet(
@@ -158,7 +152,7 @@ class FavoriteViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Добавление и удаление избранных рецептов"""
+    """Добавление и удаление избранных рецептов."""
 
     serializer_class = FavoriteSerializer
 
