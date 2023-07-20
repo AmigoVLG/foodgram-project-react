@@ -1,0 +1,42 @@
+version: '3'
+services:
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - /var/lib/postgresql/data/
+    env_file:
+      - ./.env
+
+  backend:
+    build: ./backend/
+    volumes:
+      - static:/static/
+      - media:/media/foods/images
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+
+  frontend:
+    build: ./frontend/
+    volumes:
+      - frontend_value:/app/build/
+
+  nginx:
+    image: nginx:1.21.3-alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./docs/:/usr/share/nginx/html/api/docs/
+      - frontend_value:/usr/share/nginx/html/
+      - static:/var/html/static/
+      - media:/var/html/media/foods/images
+    depends_on:
+      - backend
+      - frontend
+      
+volumes:
+  static:
+  media:
+  frontend_value:
+  postgres_data:
