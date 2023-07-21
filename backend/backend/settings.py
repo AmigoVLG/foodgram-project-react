@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 
 DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = ['127.0.0.1',]
+ALLOWED_HOSTS = ['127.0.0.1','158.160.16.19','localhost']
 # os.getenv("ALLOWED_HOSTS").split()
 
 INSTALLED_APPS = [
@@ -62,23 +62,15 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('POSTGRES_HOST', ''),
+        'PORT': os.getenv('POSTGRES_PORT', 5432)
     }
 }
-
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'django'),
-#         'USER': os.getenv('POSTGRES_USER', 'django'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-#         'HOST': os.getenv('POSTGRES_HOST', ''),
-#         'PORT': os.getenv('POSTGRES_PORT', 5432)
-#     }
-# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -133,8 +125,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-print (os.path)
-print (BASE_DIR)
+MEDIA_ROOT = '/media/'
+
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

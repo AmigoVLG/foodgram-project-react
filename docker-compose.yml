@@ -25,12 +25,12 @@ services:
   nginx:
     image: nginx:1.21.3-alpine
     ports:
-      - "8000:80"
+      - "80:80"
     volumes:
       - ./docs/:/usr/share/nginx/html/api/docs/
       - frontend_value:/usr/share/nginx/html/
       - static:/var/html/static/
-      - media:/var/html/media/foods/images
+      - media:/media/foods/images
     depends_on:
       - backend
       - frontend
