@@ -70,11 +70,12 @@ class IngredientRecipesSerializer(serializers.ModelSerializer):
     """Сериализатор для связи ингридиентов, рецептов и количества."""
 
     id = serializers.IntegerField(source="ingredient.id")
-    ingredient = serializers.StringRelatedField(read_only=True)
+    name = serializers.StringRelatedField(read_only=True, source='ingredient')
+    measurement_unit = serializers.CharField(source="unit")
 
     class Meta:
         model = IngredientRecipe
-        fields = ("id", "ingredient", "amount", "unit")
+        fields = ("id", "name", "amount", "measurement_unit")
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -162,11 +163,12 @@ class RecipesSerializer(serializers.ModelSerializer):
             current_ingredient = get_object_or_404(
                 Ingredient, id=ingredient["id"]
             )
+            print (instance.id , instance.name,"a nfr", instance.ingredients, "!!!!1", current_ingredient.id, current_ingredient.name)
             IngredientRecipe.objects.update_or_create(
-                name=instance,
-                ingredient=current_ingredient,
+                name_id=instance.id,
+                ingredient_id=current_ingredient.id,
                 amount=ingredient["amount"],
-                unit=current_ingredient.unit,
+                unit=current_ingredient.unit
             )
 
     def create(self, validated_data):
@@ -194,7 +196,7 @@ class MiniRecipesSerializers(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    """Сериализатор подписок."""
+    """Сериализатор избраного."""
 
     user = serializers.CharField(write_only=True, default=None)
     recipes = MiniRecipesSerializers(default=None)
@@ -259,7 +261,7 @@ class UserFollowSerializer(serializers.ModelSerializer):
     recipes = MiniRecipesSerializers(
         read_only=True, many=True, source="author"
     )
-    recipes_count = serializers.IntegerField()
+    recipes_count = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -275,6 +277,9 @@ class UserFollowSerializer(serializers.ModelSerializer):
             "recipes_count",
         )
 
+    def get_recipes_count(self, obj): 
+        return obj.author.count() 
+
     def get_is_subscribed(self, obj):
         user = self.context["request"].user
         if user.is_authenticated:
@@ -283,7 +288,7 @@ class UserFollowSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Сериадизатор добавления и удаления подписок."""
+    """Сериализатор добавления и удаления подписок."""
 
     following = UserFollowSerializer(default=None)
     user = serializers.CharField(write_only=True, default=None)

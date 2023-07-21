@@ -63,9 +63,6 @@ class IngredientRecipe(models.Model):
     amount = models.IntegerField()
     unit = models.CharField(max_length=150)
 
-    def __str__(self):
-        return self.ingredient
-
 
 class TagRecipe(models.Model):
     name = models.ForeignKey(

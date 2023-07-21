@@ -52,7 +52,7 @@ class SubscribeViewSet(
     """Добавление и удаление подписок."""
 
     serializer_class = FollowSerializer
-    queryset = User.objects.all().annotate(recipes_count=Count("author"))
+    queryset = User.objects.all()
 
     def perform_create(self, serializer, id=None):
         subscribe = self.kwargs.get("id")
@@ -118,7 +118,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         )
         shopping_cart = (
             shopping_query.values_list()
-            .values("ingredient__name", "unit")
+            .values("ingredient__name", "ingredient_unit")
             .annotate(amount=Sum("amount"))
         )
         return create_shopping_cart(shopping_cart)
@@ -129,6 +129,7 @@ class TagsViewSet(ListRetrieveViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
     permission_classes = [
         AllowAny,
     ]
@@ -139,6 +140,7 @@ class IngridientsViewSet(ListRetrieveViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    pagination_class = None
     permission_classes = [
         AllowAny,
     ]
