@@ -8,10 +8,11 @@ def create_shopping_cart(
     ingredients_cart: QuerySet[ShoppingCart],
 ) -> HttpResponse:
     """Формируем список покупок из запроса в файл."""
-
     shopping_cart = "\n".join(
         [
-            f'{i["ingredient__name"]} ' f'({i["unit"]}) – ' f'{i["amount"]}'
+            f'{i["ingredient__name"]} '
+            f'({i["ingredient__unit"]}) – '
+            f'{i["amount"]}'
             for i in ingredients_cart
         ]
     )

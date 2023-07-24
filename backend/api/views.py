@@ -2,24 +2,37 @@ from djoser.views import UserViewSet
 from rest_framework import filters, generics, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (
-    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
 
-from django.db.models import Count, Sum
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Count, Sum
 from django.shortcuts import get_object_or_404
 
 from recipes.models import (
-    FavoritRecipe, Ingredient, IngredientRecipe, Recipe, ShoppingCart, Tag,
+    FavoritRecipe,
+    Ingredient,
+    IngredientRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag,
 )
 from users.models import Follow, User
-from .filters import RecipesFilter, IngredientsFilter
+
+from .filters import IngredientsFilter, RecipesFilter
 from .pagination import CustomPagination
 from .permissions import PermissionDenied
 from .serializers import (
-    CustomUserSerializer, FavoriteSerializer, FollowSerializer,
-    IngredientSerializer, RecipesSerializer, ShoppingSerializer, TagSerializer,
+    CustomUserSerializer,
+    FavoriteSerializer,
+    FollowSerializer,
+    IngredientSerializer,
+    RecipesSerializer,
+    ShoppingSerializer,
+    TagSerializer,
     UserFollowSerializer,
 )
 from .utils import create_shopping_cart
@@ -118,7 +131,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         )
         shopping_cart = (
             shopping_query.values_list()
-            .values("ingredient__name", "ingredient_unit")
+            .values("ingredient__name", "ingredient__unit")
             .annotate(amount=Sum("amount"))
         )
         return create_shopping_cart(shopping_cart)
@@ -144,9 +157,9 @@ class IngridientsViewSet(ListRetrieveViewSet):
     permission_classes = [
         AllowAny,
     ]
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientsFilter
-    search_fields = ('^name', )
+    search_fields = ("^name",)
 
 
 class FavoriteViewSet(

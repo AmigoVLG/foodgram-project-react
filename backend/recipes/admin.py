@@ -25,9 +25,8 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = [RecipeTagsInLine, RecipeIngredientsInLine]
 
     def get_queryset(self, request):
-        queryset = (
-            Recipe.objects.select_related("author")
-            .prefetch_related("tags", "ingredients")
+        queryset = Recipe.objects.select_related("author").prefetch_related(
+            "tags", "ingredients"
         )
         return queryset
 

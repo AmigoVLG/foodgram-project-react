@@ -4,12 +4,16 @@ from djoser.serializers import UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from django.contrib.auth.models import AnonymousUser
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 
 from recipes.models import (
-    FavoritRecipe, Ingredient, IngredientRecipe, Recipe, ShoppingCart, Tag,
+    FavoritRecipe,
+    Ingredient,
+    IngredientRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag,
 )
 from users.models import Follow, User
 
@@ -70,7 +74,7 @@ class IngredientRecipesSerializer(serializers.ModelSerializer):
     """Сериализатор для связи ингридиентов, рецептов и количества."""
 
     id = serializers.IntegerField(source="ingredient.id")
-    name = serializers.StringRelatedField(read_only=True, source='ingredient')
+    name = serializers.StringRelatedField(read_only=True, source="ingredient")
     measurement_unit = serializers.CharField(source="unit")
 
     class Meta:
@@ -126,9 +130,9 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context["request"].user
-        if type(user) == AnonymousUser:
-            return False
-        return obj.shopping.filter(user=user).exists()
+        if user.is_authenticated:
+            return obj.shopping.filter(user=user).exists()
+        return False
 
     def get_is_favorited(self, obj):
         user = self.context["request"].user
@@ -163,12 +167,20 @@ class RecipesSerializer(serializers.ModelSerializer):
             current_ingredient = get_object_or_404(
                 Ingredient, id=ingredient["id"]
             )
-            print (instance.id , instance.name,"a nfr", instance.ingredients, "!!!!1", current_ingredient.id, current_ingredient.name)
+            print(
+                instance.id,
+                instance.name,
+                "a nfr",
+                instance.ingredients,
+                "!!!!1",
+                current_ingredient.id,
+                current_ingredient.name,
+            )
             IngredientRecipe.objects.update_or_create(
                 name_id=instance.id,
                 ingredient_id=current_ingredient.id,
                 amount=ingredient["amount"],
-                unit=current_ingredient.unit
+                unit=current_ingredient.unit,
             )
 
     def create(self, validated_data):
@@ -190,9 +202,11 @@ class RecipesSerializer(serializers.ModelSerializer):
 class MiniRecipesSerializers(serializers.ModelSerializer):
     """Сериализатор рецептов для предпросмотра."""
 
+    cooking_time = serializers.IntegerField(source="time")
+
     class Meta:
         model = Recipe
-        fields = ("id", "name", "image", "time")
+        fields = ("id", "name", "image", "cooking_time")
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -277,8 +291,8 @@ class UserFollowSerializer(serializers.ModelSerializer):
             "recipes_count",
         )
 
-    def get_recipes_count(self, obj): 
-        return obj.author.count() 
+    def get_recipes_count(self, obj):
+        return obj.author.count()
 
     def get_is_subscribed(self, obj):
         user = self.context["request"].user

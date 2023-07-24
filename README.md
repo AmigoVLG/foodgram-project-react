@@ -1,25 +1,53 @@
-Foodgram Project
-FOODGRAM - это API интерфейс предназначеный для развития функционала сайта.
+## Foodgram – продуктовый помошник
 
-Установка
-Клонируйте проект в на локальную машину, установите виртуальное окружение и запустите его
+Cайт  доступен по ссылке: http://it-home.shop
+```
+Суперюзер
+Логин: reviewerlogin
+Пароль: reviverpassword
+```
+Документация к API по ссылке: http://it-home.shop/api/docs/
 
-python -m venv venv
-source venv/Scripts/activate
-Установите все зависимости из файла requirements.txt
+## О проекте
+На этом сервисе пользователи смогут:
+- публиковать рецепты
+- подписываться на публикации других авторов
+- добавлять понравившиеся рецепты в список «Избранное»
+- скачивать сводный список продуктов для покупок
 
-pip install -r requirements.txt
-Запуск
-Для запуска проекта перейдите в папку проекта с файлом manage.py и выполните команду
+## Стек технологий
 
-python manage.py runserver 
-API
-Несколько примеров взаимодействия c API:
+![python version](https://img.shields.io/badge/Python-3.7-yellowgreen)
+![python version](https://img.shields.io/badge/Django-3.2.15-yellowgreen)
+![python version](https://img.shields.io/badge/djangorestframework-3.13.1-yellowgreen)
+![python version](https://img.shields.io/badge/djoser-2.1.0-yellowgreen)
+![python version](https://img.shields.io/badge/gunicorn-20.1.0-yellowgreen)
+![python version](https://img.shields.io/badge/psycopg2--binary-2.9.2-yellowgreen)
 
-http://127.0.0.1:8000/api/recipes/ Получение списка рецептов
+## Запуск проекта
 
-http://127.0.0.1:8000/api/users/ [GET] Получения списка пользователей, [POST] Создание нового пользователя
+Клонировать репозиторий и перейти в него в командной строке
 
-http://127.0.0.1:8000/api/auth/token/login/ - получение токена авторизации по электронной почте и паролю
+```
+https://github.com/amigovlg/foodgram-project-react.git
+cd foodgram-project-react
+```
 
+Перейти в папку "infra" <br>
+```
+cd infra
+```
+Заполнить файл ".env" собственными настройками БД <br>
+Запустить контейнеры
 
+```
+docker-compose up -d --build
+```
+
+В скрипте автоматически выполнятся задачи миграции, подключения статики и наполнение базы демонстрациооными данными
+
+Запустить в браузере
+
+```
+http://localhost/
+```

@@ -1,14 +1,20 @@
-version: '3'
+version: '3.8'
+
+volumes: 
+  static:
+  media:
+  pg_data:
 services:
   db:
     image: postgres:13.0-alpine
     volumes:
-      - /var/lib/postgresql/data/
+      - pg_data:/var/lib/postgresql/data
     env_file:
       - ./.env
 
   backend:
-    build: ./backend/
+    image: amigovlg/food_backend
+    restart: always
     volumes:
       - static:/static/
       - media:/media/foods/images
@@ -18,25 +24,21 @@ services:
       - ./.env
 
   frontend:
-    build: ./frontend/
+    immge: amigovlg/food_frontend
     volumes:
-      - frontend_value:/app/build/
+      - ../frontend/:/app/result_build/
 
   nginx:
     image: nginx:1.21.3-alpine
     ports:
       - "80:80"
     volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./docs/:/usr/share/nginx/html/api/docs/
-      - frontend_value:/usr/share/nginx/html/
+      - ../frontend/build:/usr/share/nginx/html/
       - static:/var/html/static/
       - media:/media/foods/images
     depends_on:
       - backend
       - frontend
       
-volumes:
-  static:
-  media:
-  frontend_value:
-  postgres_data:
