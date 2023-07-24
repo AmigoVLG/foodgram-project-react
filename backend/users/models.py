@@ -12,7 +12,7 @@ class User(AbstractUser):
         "Электронная почта", unique=True, blank=False, max_length=254
     )
 
-    USERNAME_FIELD = "username"
+    USERNAME_FIELD = "email"
     UNIQUE_FIELDS = ["username", "email"]
     REQUIRED_FIELDS = ["email", "first_name", "last_name", "password"]
 

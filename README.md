@@ -3,8 +3,8 @@
 Cайт  доступен по ссылке: http://it-home.shop
 ```
 Суперюзер
-Логин: reviewerlogin
-Пароль: reviverpassword
+email: king@king.com
+Пароль: king
 ```
 Документация к API по ссылке: http://it-home.shop/api/docs/
 
