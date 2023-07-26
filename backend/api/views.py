@@ -43,7 +43,7 @@ class CustomUserViewSet(UserViewSet):
 
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    # pagination_class = CustomPagination
+    pagination_class = CustomPagination
 
 
 class FollowView(generics.ListAPIView):

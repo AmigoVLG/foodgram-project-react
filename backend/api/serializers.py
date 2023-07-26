@@ -219,7 +219,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get("request")
         recipes_id = self.context.get("view").kwargs.get("id")
-        user_recipes = get_object_or_404(User, author=recipes_id)
         if (
             request.method == "POST"
             and FavoritRecipe.objects.filter(
@@ -286,7 +285,7 @@ class UserFollowSerializer(serializers.ModelSerializer):
         а при создании (POST в SubscribeViewset) идет возврат добавленных
         значений но без использования queryset из FollowView. В результате -
         ошибка 500 https://ibb.co/Jmx2qKH и https://ibb.co/mSdZp9B.
-        На гит хабе мне не удалось найти реализацию этого метода через аннотацию."""
+        На гит хабе не нашел реализацию этого метода через аннотацию."""
         return obj.author.count()
 
     def get_is_subscribed(self, obj):
