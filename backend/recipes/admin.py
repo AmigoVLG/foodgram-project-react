@@ -29,7 +29,7 @@ class RecipeTagsInLine(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "author", "count_favorites")
     search_fields = ("name",)
-    list_filter = [AuthorFilter]
+    list_filter = ("tags", AuthorFilter,)
     inlines = [RecipeTagsInLine, RecipeIngredientsInLine]
 
     def get_queryset(self, request):

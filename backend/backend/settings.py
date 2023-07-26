@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "api",
     "users",
     "recipes",
+    "admin_auto_filters",
 ]
 
 MIDDLEWARE = [

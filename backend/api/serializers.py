@@ -226,6 +226,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
             ).exists()
         ):
             raise serializers.ValidationError("уже добавлен")
+	return data
 
 
 class ShoppingSerializer(serializers.ModelSerializer):
@@ -279,13 +280,6 @@ class UserFollowSerializer(serializers.ModelSerializer):
         )
 
     def get_recipes_count(self, obj):
-        """не получается реализовать через annotate т.к. этот сериалайзер
-        используется как вложенный при создании подписки. Поэтому,
-        при прямом обращении (при просмотре) ответ возвращается правильный,
-        а при создании (POST в SubscribeViewset) идет возврат добавленных
-        значений но без использования queryset из FollowView. В результате -
-        ошибка 500 https://ibb.co/Jmx2qKH и https://ibb.co/mSdZp9B.
-        На гит хабе не нашел реализацию этого метода через аннотацию."""
         return obj.author.count()
 
     def get_is_subscribed(self, obj):
