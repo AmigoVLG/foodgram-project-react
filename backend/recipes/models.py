@@ -84,8 +84,17 @@ class FavoritRecipe(models.Model):
 
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="shopping"
+        User,
+        on_delete=models.CASCADE,
+        related_name="shopping",
+        verbose_name="пользователь",
     )
     recipes = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name="shopping"
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name="shopping",
+        verbose_name="название рецепта",
     )
+
+    class Meta:
+        verbose_name_plural = "Списки покупок"

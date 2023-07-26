@@ -6,6 +6,7 @@ from .models import Follow, User
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
     list_display = ("user", "following")
+    search_fields = ("user__email", "following__email")
 
     def get_queryset(self, request):
         queryset = Follow.objects.select_related("user", "following")
@@ -23,9 +24,4 @@ class UserAdmin(admin.ModelAdmin):
         "is_staff",
         "is_active",
     )
-    list_editable = ("username",)
     search_fields = ("username", "email")
-    list_filter = (
-        "username",
-        "email",
-    )

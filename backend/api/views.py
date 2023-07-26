@@ -39,9 +39,11 @@ from .utils import create_shopping_cart
 
 
 class CustomUserViewSet(UserViewSet):
+    """Представление пользователя."""
+
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    pagination_class = CustomPagination
+    # pagination_class = CustomPagination
 
 
 class FollowView(generics.ListAPIView):

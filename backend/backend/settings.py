@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 
 DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split()
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split()
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -106,6 +106,7 @@ DJOSER = {
     "HIDE_USERS": False,
     "PERMISSIONS": {
         "user_list": ["rest_framework.permissions.AllowAny"],
+        "user": ["rest_framework.permissions.IsAuthenticated"],
     },
 }
 AUTH_USER_MODEL = "users.User"

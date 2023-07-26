@@ -1,6 +1,18 @@
+from admin_auto_filters.filters import AutocompleteFilter
+
 from django.contrib import admin
 
-from .models import Ingredient, Recipe, Tag
+from .models import Ingredient, Recipe, Tag, ShoppingCart
+
+
+class AuthorFilter(AutocompleteFilter):
+    title = "Author"
+    field_name = "author"
+
+
+class ShoppingCartFilter(AutocompleteFilter):
+    title = "Recipes"
+    field_name = "recipes"
 
 
 class RecipeIngredientsInLine(admin.TabularInline):
@@ -16,12 +28,8 @@ class RecipeTagsInLine(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "author", "count_favorites")
-    search_fields = ("name", "author")
-    list_filter = (
-        "name",
-        "author",
-        "tags",
-    )
+    search_fields = ("name",)
+    list_filter = [AuthorFilter]
     inlines = [RecipeTagsInLine, RecipeIngredientsInLine]
 
     def get_queryset(self, request):
@@ -37,13 +45,18 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_editable = ("name", "unit")
     list_display = ("id", "name", "unit")
-    list_filter = ("name",)
     search_fields = ("name",)
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_editable = ("name", "color", "slug")
     list_display = ("id", "name", "color", "slug")
+    search_fields = ("name",)
+
+
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = ("user", "recipes")
+    search_fields = ("user",)
+    list_filter = [ShoppingCartFilter]
